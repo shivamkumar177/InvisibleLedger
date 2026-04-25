@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import SwipeToDelete from './SwipeToDelete';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type Transaction = {
   id: number;
@@ -60,6 +61,23 @@ export default function MobileDashboard({ token, onLogout }: { token: string, on
     .filter(t => t.is_expense)
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // Group transactions by day for the chart
+  const chartData = useMemo(() => {
+    const grouped = transactions.reduce((acc, t) => {
+      const date = new Date(t.timestamp).toLocaleDateString();
+      if (!acc[date]) acc[date] = { date, outflow: 0, inflow: 0 };
+      if (t.is_expense) {
+        acc[date].outflow += t.amount;
+      } else {
+        acc[date].inflow += t.amount;
+      }
+      return acc;
+    }, {} as Record<string, { date: string, outflow: number, inflow: number }>);
+
+    // Sort by date and take the last 7 days
+    return Object.values(grouped).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(-7);
+  }, [transactions]);
+
   return (
     <div className="bg-background text-on-background flex flex-col min-h-screen pb-20">
       <header className="h-14 w-full bg-surface/70 backdrop-blur-xl sticky top-0 z-40 flex justify-between items-center px-4 border-b border-surface-variant">
@@ -73,10 +91,32 @@ export default function MobileDashboard({ token, onLogout }: { token: string, on
       <main className="flex-1 px-4 py-6 space-y-6">
         <section className="bg-surface-container-low rounded-lg p-6 flex flex-col gap-2 border border-surface-variant">
           <h2 className="font-mono text-xs text-tertiary uppercase tracking-widest">Total Outflow</h2>
-          <div className="text-4xl font-bold font-mono tracking-tighter">
+          <div className="text-4xl font-bold font-mono tracking-tighter text-error">
             ${totalOutflow.toFixed(2)}
           </div>
         </section>
+
+        {/* Chart Section */}
+        {chartData.length > 0 && (
+          <section className="bg-surface-container-low rounded-lg p-4 flex flex-col border border-surface-variant h-48">
+             <h3 className="font-mono text-xs text-tertiary uppercase tracking-widest mb-2">Flow (7 Days)</h3>
+             <div className="flex-1 w-full h-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
+                    <XAxis dataKey="date" stroke="var(--color-tertiary)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => v.split('/')[1] + '/' + v.split('/')[0]} />
+                    <YAxis stroke="var(--color-tertiary)" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value > 1000 ? (value/1000).toFixed(1) + 'k' : value}`} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'var(--color-surface-container-high)', border: '1px solid var(--color-surface-variant)', borderRadius: '8px' }}
+                      itemStyle={{ color: 'var(--color-on-surface)', fontFamily: 'var(--font-geist-mono)', fontSize: '12px' }}
+                      labelStyle={{ color: 'var(--color-tertiary)', fontSize: '10px' }}
+                    />
+                    <Line type="monotone" dataKey="outflow" stroke="var(--color-error)" strokeWidth={2} dot={false} name="Outflow" />
+                    <Line type="monotone" dataKey="inflow" stroke="var(--color-primary)" strokeWidth={2} dot={false} name="Inflow" />
+                  </LineChart>
+                </ResponsiveContainer>
+             </div>
+          </section>
+        )}
 
         <section className="space-y-4">
           <h3 className="font-mono text-xs text-tertiary uppercase tracking-widest">Transaction Feed</h3>

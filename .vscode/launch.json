@@ -15,7 +15,9 @@
       "cwd": "${workspaceFolder}/backend",
       "jinja": true,
       "justMyCode": true,
-      "envFile": "${workspaceFolder}/.env"
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "redirectOutput": true
     },
     {
       "name": "Frontend: Next.js",

@@ -5,10 +5,12 @@ import MobileDashboard from "./components/MobileDashboard";
 import Login from "./components/Login";
 
 export default function Home() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     // Check for existing token
     const savedToken = localStorage.getItem('ledger_token');
     if (savedToken) {
@@ -26,6 +28,8 @@ export default function Home() {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  if (!isMounted) return null;
 
   if (!token) {
     return <Login onLogin={setToken} />;

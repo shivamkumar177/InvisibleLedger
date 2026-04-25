@@ -26,8 +26,8 @@ export default function RootLayout({
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body className={`${inter.variable} ${geistMono.variable} antialiased selection:bg-primary/30 selection:text-primary`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <body suppressHydrationWarning className={`${inter.variable} ${geistMono.variable} antialiased selection:bg-primary/30 selection:text-primary`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
       </body>

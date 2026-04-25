@@ -6,6 +6,10 @@ from fastapi import FastAPI, Request, BackgroundTasks, Depends, HTTPException, s
 from fastapi.security.api_key import APIKeyHeader
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from database import engine, Base, get_db, SessionLocal
 import models
@@ -47,12 +51,19 @@ def process_and_save_transaction(source: str, raw_data: str, text: str = None, i
             logger.error("Failed to parse transaction.")
             return
 
+        amount = parsed_data.get('amount', 0.0)
+
+        # Skip transaction if amount is 0
+        if amount == 0 or amount is None:
+            logger.warning("Transaction skipped: amount is 0 or None")
+            return
+
         # Use SessionLocal in a context manager
         with SessionLocal() as db:
             new_tx = models.Transaction(
                 source=source,
-                amount=parsed_data.get('amount', 0.0),
-                currency=parsed_data.get('currency', 'INR'),
+                amount=amount,
+                currency='INR',  # All transactions in INR
                 merchant=parsed_data.get('merchant', 'Unknown'),
                 category=parsed_data.get('category', 'Other'),
                 is_expense=parsed_data.get('is_expense', True),
@@ -61,7 +72,7 @@ def process_and_save_transaction(source: str, raw_data: str, text: str = None, i
             db.add(new_tx)
             db.commit()
             db.refresh(new_tx)
-            logger.info(f"Saved transaction {new_tx.id}: {new_tx.amount} {new_tx.currency} at {new_tx.merchant}")
+            logger.info(f"Saved transaction {new_tx.id}: {new_tx.amount} INR at {new_tx.merchant}")
     except Exception as e:
         logger.error(f"Error in background task: {e}")
 
