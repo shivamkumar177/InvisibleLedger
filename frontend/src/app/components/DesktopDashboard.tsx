@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type Transaction = {
   id: number;
@@ -49,6 +50,23 @@ export default function DesktopDashboard({ token, onLogout }: { token: string, o
     .filter(t => t.is_expense)
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // Group transactions by day for the chart
+  const chartData = useMemo(() => {
+    const grouped = transactions.reduce((acc, t) => {
+      const date = new Date(t.timestamp).toLocaleDateString();
+      if (!acc[date]) acc[date] = { date, outflow: 0, inflow: 0 };
+      if (t.is_expense) {
+        acc[date].outflow += t.amount;
+      } else {
+        acc[date].inflow += t.amount;
+      }
+      return acc;
+    }, {} as Record<string, { date: string, outflow: number, inflow: number }>);
+
+    // Sort by date and take the last 7 days
+    return Object.values(grouped).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(-7);
+  }, [transactions]);
+
   return (
     <div className="flex h-screen overflow-hidden bg-background text-on-surface">
       {/* Sidebar */}
@@ -94,24 +112,45 @@ export default function DesktopDashboard({ token, onLogout }: { token: string, o
 
         <div className="flex-1 flex overflow-hidden p-4 gap-4">
           <section className="flex-[1.8] flex flex-col gap-4 overflow-y-auto pr-2">
-            <div className="grid grid-cols-2 gap-4 shrink-0">
-              <div className="bg-surface-container-low border border-surface-variant rounded-lg p-4 flex flex-col gap-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-mono text-xs text-tertiary uppercase">Total Outflow</span>
-                    <span className="text-2xl font-bold font-mono">${totalOutflow.toFixed(2)}</span>
-                  </div>
-                </div>
+            <div className="grid grid-cols-3 gap-4 shrink-0 mb-4">
+              <div className="bg-surface-container-low border border-surface-variant rounded-lg p-4 flex flex-col gap-2">
+                <span className="font-mono text-xs text-tertiary uppercase">Total Outflow</span>
+                <span className="text-3xl font-bold font-mono text-error">${totalOutflow.toFixed(2)}</span>
               </div>
-              <div className="bg-surface-container-low border border-surface-variant rounded-lg p-4 flex flex-col gap-4">
-                 <div className="flex justify-between items-start">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-mono text-xs text-tertiary uppercase">Transactions</span>
-                    <span className="text-2xl font-bold font-mono">{transactions.length}</span>
-                  </div>
-                </div>
+              <div className="bg-surface-container-low border border-surface-variant rounded-lg p-4 flex flex-col gap-2">
+                <span className="font-mono text-xs text-tertiary uppercase">Transactions Processed</span>
+                <span className="text-3xl font-bold font-mono text-primary">{transactions.length}</span>
+              </div>
+              <div className="bg-surface-container-low border border-surface-variant rounded-lg p-4 flex flex-col gap-2 relative overflow-hidden group">
+                 <span className="font-mono text-xs text-tertiary uppercase">System Status</span>
+                 <div className="flex items-center gap-2 mt-2">
+                    <div className="w-3 h-3 rounded-full bg-primary animate-pulse"></div>
+                    <span className="font-mono text-sm text-primary">All systems nominal</span>
+                 </div>
               </div>
             </div>
+
+            {/* Chart Section */}
+            {chartData.length > 0 && (
+              <div className="bg-surface-container-low border border-surface-variant rounded-lg p-4 h-64 mb-4 flex flex-col">
+                <span className="font-mono text-xs text-tertiary uppercase mb-4">Flow Overview (Last 7 Days)</span>
+                <div className="flex-1 w-full h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-surface-variant)" vertical={false} />
+                      <XAxis dataKey="date" stroke="var(--color-tertiary)" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis stroke="var(--color-tertiary)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: 'var(--color-surface-container-high)', border: '1px solid var(--color-surface-variant)', borderRadius: '8px' }}
+                        itemStyle={{ color: 'var(--color-on-surface)', fontFamily: 'var(--font-geist-mono)' }}
+                      />
+                      <Line type="monotone" dataKey="outflow" stroke="var(--color-error)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-error)' }} name="Outflow" />
+                      <Line type="monotone" dataKey="inflow" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-primary)' }} name="Inflow" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
 
             <div className="bg-surface-container-low border border-surface-variant rounded-lg flex flex-col flex-1 min-h-0">
               <div className="px-4 py-3 border-b border-surface-variant bg-surface/50">
