@@ -1,0 +1,11 @@
+{
+  "python.defaultInterpreterPath": "/Users/shivamkumar/miniconda3/envs/leger-env/bin/python",
+  "python.linting.enabled": true,
+  "python.formatting.provider": "none",
+  "python.terminal.useEnvFile": true,
+  "[python]": {
+    "editor.defaultFormatter": null
+  },
+  "python-envs.defaultEnvManager": "ms-python.python:conda",
+  "python-envs.defaultPackageManager": "ms-python.python:conda"
+}
