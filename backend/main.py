@@ -52,7 +52,7 @@ def process_and_save_transaction(source: str, raw_data: str, text: str = None, i
             return
 
         amount = parsed_data.get('amount', 0.0)
-
+        
         # Skip transaction if amount is 0
         if amount == 0 or amount is None:
             logger.warning("Transaction skipped: amount is 0 or None")
