@@ -93,3 +93,18 @@ If you are using an iPhone, you can automatically forward your bank/transaction 
 10. Tap **Done** to save the automation.
 
 Now, whenever your iPhone receives an SMS matching your criteria, it will silently send the text to your Invisible Ledger in the background!
+
+---
+
+## Using the Telegram Bot
+
+Once your `TELEGRAM_BOT_TOKEN` and `WEBHOOK_URL` are configured and your backend is running, using the Telegram integration is the easiest way to log transactions.
+
+1. **Find your bot:** In the Telegram app, search for the username you gave your bot when you created it with `@BotFather`.
+2. **Start the chat:** Tap **Start** (or send `/start`).
+3. **Log a transaction:**
+   - **Text:** Simply type a message like `"Bought a coffee for $4.50 at Starbucks"` or `"Uber ride 15 EUR"`. Send it to the bot.
+   - **Images (Receipts):** Take a photo of a physical receipt or upload a screenshot of a digital receipt and send it to the bot.
+   - **Documents:** You can also send PDF invoices or image documents.
+4. **The Silent Magic:** The bot will intentionally *not* reply to you (as per the "Silent Ledger" philosophy). However, in the background, your backend will send the text or image to Gemini AI, extract the merchant, amount, category, and currency, and save it to your database.
+5. **Verify:** Open your Next.js dashboard, and you will see the new transaction appear automatically!
