@@ -61,3 +61,35 @@ All of these should be saved in the `.env` file at the root of your project.
 **How to get it:**
 - **For Production:** This is the domain name where you have deployed your backend API (e.g., `https://api.ledger.yourdomain.com`). Make sure it starts with `https://`.
 - **For Local Testing:** Telegram webhooks cannot point to `localhost`. You must use a tunneling service like [ngrok](https://ngrok.com/) to expose your local port 8000 to the internet. Run `ngrok http 8000`, and paste the `https://...` URL it gives you into your `.env` file.
+
+---
+
+## Setting up SMS Forwarding on iPhone (Apple Shortcuts)
+
+If you are using an iPhone, you can automatically forward your bank/transaction SMS messages to your Ledger using the built-in Apple Shortcuts app.
+
+1. **Open the Shortcuts app** on your iPhone.
+2. Go to the **Automation** tab at the bottom.
+3. Tap the **+** (plus) icon in the top right to create a new Personal Automation.
+4. Scroll down and select **Message**.
+5. Set the conditions for the automation:
+   - **Message Contains:** Enter keywords that your bank uses (e.g., "spent", "debited", "credited", "purchase").
+   - **Sender:** (Optional) You can specify your bank's number or contact if you want to be extra precise.
+   - Choose **Run Immediately** (so it happens silently without asking you).
+6. Tap **Next**.
+7. Tap **New Blank Automation**.
+8. Tap **Add Action** and search for **Get Contents of URL**.
+9. Configure the action:
+   - **URL:** Enter your deployed webhook URL (e.g., `https://api.ledger.yourdomain.com/api/v1/ingest/sms`).
+   - Tap the arrow next to the URL to expand the advanced settings.
+   - **Method:** Change from `GET` to `POST`.
+   - **Headers:** Add a new header:
+     - **Key:** `X-API-KEY`
+     - **Text:** The secret `API_KEY` you defined in your `.env` file.
+   - **Request Body:** Select **JSON**.
+   - Add a new Text field in the JSON body:
+     - **Key:** `text`
+     - **Text:** Tap here and select **Shortcut Input** (or "Message" -> "Content") from the variables bar above the keyboard. This passes the actual text of the SMS.
+10. Tap **Done** to save the automation.
+
+Now, whenever your iPhone receives an SMS matching your criteria, it will silently send the text to your Invisible Ledger in the background!
