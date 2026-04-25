@@ -160,3 +160,19 @@ To back it up, you can copy the database file from the running container or volu
 ```bash
 docker cp $(docker-compose ps -q backend):/data/ledger.db ./ledger_backup.db
 ```
+
+---
+
+## 8. Cloudflare Firewall Setup (Recommended)
+
+To protect your VPS IP address and ensure only authorized traffic reaches your server, you should configure Cloudflare.
+
+1. **Change Nameservers**: Update your domain's nameservers at your registrar to point to Cloudflare.
+2. **DNS Records**:
+   - Add an `A` record for `ledger.yourdomain.com` pointing to your VPS IP address. Ensure the proxy status (orange cloud) is **ON**.
+   - Add an `A` record for `api.ledger.yourdomain.com` pointing to your VPS IP address. Ensure the proxy status (orange cloud) is **ON**.
+3. **SSL/TLS Configuration**: Go to the SSL/TLS tab in Cloudflare and set the encryption mode to **Full (strict)** since you have Certbot certificates installed on your VPS.
+4. **Firewall Rules**:
+   - Go to Security -> WAF -> Custom rules.
+   - Create a rule to block traffic that doesn't originate from Cloudflare's IP ranges if you want to strictly lock down your VPS.
+   - Alternatively, use Cloudflare Access for the dashboard (`ledger.yourdomain.com`) to add an extra layer of authentication before reaching the Next.js app.
