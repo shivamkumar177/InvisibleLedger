@@ -10,6 +10,7 @@ type Transaction = {
   currency: string;
   merchant: string;
   category: string;
+  payment_method: string;
   is_expense: boolean;
 };
 
@@ -124,15 +125,18 @@ export default function MobileDashboard({ token, onLogout }: { token: string, on
           <div className="flex flex-col divide-y divide-surface-variant border-y border-surface-variant">
             {transactions.map(t => (
               <SwipeToDelete key={t.id} onDelete={() => deleteTransaction(t.id)}>
-                <div className="grid grid-cols-[auto_1fr_auto] gap-4 py-3 items-center px-2">
-                  <div className="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-on-surface">
-                    <span className="material-symbols-outlined">{t.is_expense ? 'payments' : 'south_west'}</span>
+                <div className="grid grid-cols-[auto_1fr_auto] gap-4 py-3 items-center px-2 hover:bg-surface-container-low transition-colors">
+                  <div className="w-10 h-10 rounded border border-surface-variant bg-surface-container-high flex items-center justify-center text-on-surface">
+                    <span className="material-symbols-outlined text-[20px]">{t.is_expense ? 'receipt_long' : 'south_west'}</span>
                   </div>
                   <div>
-                    <div className="font-mono text-sm">{t.merchant}</div>
-                    <div className="font-mono text-xs text-tertiary mt-1">{t.category}</div>
+                    <div className="font-mono text-sm font-bold text-on-surface">{t.merchant}</div>
+                    <div className="font-mono text-xs text-tertiary mt-1 flex gap-2">
+                      <span className="bg-surface-variant/50 px-1.5 py-0.5 rounded text-[10px] border border-surface-variant">{t.category}</span>
+                      <span>• {t.payment_method}</span>
+                    </div>
                   </div>
-                  <div className={`font-mono text-sm text-right ${t.is_expense ? '' : 'text-primary'}`}>
+                  <div className={`font-mono text-sm text-right font-bold ${t.is_expense ? 'text-on-surface' : 'text-primary'}`}>
                     {t.is_expense ? '-' : '+'}${t.amount.toFixed(2)}
                   </div>
                 </div>

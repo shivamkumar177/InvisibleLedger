@@ -7,6 +7,7 @@ class TransactionBase(BaseModel):
     currency: Optional[str] = "INR"
     merchant: Optional[str] = None
     category: Optional[str] = None
+    payment_method: Optional[str] = "Unknown"
     is_expense: Optional[bool] = True
 
 class TransactionCreate(TransactionBase):

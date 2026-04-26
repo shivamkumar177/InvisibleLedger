@@ -14,11 +14,12 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 SYSTEM_INSTRUCTION = """Analyze financial data (SMS text or Receipt image). Return ONLY a JSON object.
 Rules:
-1. Extract 'amount' (numerical), 'currency' (default INR), 'merchant' (clean name), and 'category'.
+1. Extract 'amount' (numerical), 'currency' (default INR), 'merchant' (clean name), 'category', and 'payment_method'.
 2. Determine 'is_expense' (True for spend, False for income/refund).
 3. Categories: [Food, Grocery, Transport, Rent, Utilities, Shopping, Health, Entertainment, Investment, Salary, Other].
+4. Payment Methods: Try to extract the payment method if present (e.g., 'Credit Card', 'UPI', 'Bank Account', 'Cash'). Default to 'Unknown'.
 JSON Schema:
-{ "amount": float, "currency": "string", "merchant": "string", "category": "string", "is_expense": boolean }"""
+{ "amount": float, "currency": "string", "merchant": "string", "category": "string", "payment_method": "string", "is_expense": boolean }"""
 
 def parse_transaction(text: str = None, image_bytes: bytes = None, mime_type: str = "image/jpeg"):
     """

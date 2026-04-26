@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "supersecret")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin")
-print(ADMIN_PASSWORD)
 
 security = HTTPBearer()
 
