@@ -12,5 +12,6 @@ class Transaction(Base):
     currency = Column(String, default="INR")
     merchant = Column(String)
     category = Column(String)
+    payment_method = Column(String, default="Unknown") # e.g., 'Credit Card', 'UPI', 'Bank Transfer'
     is_expense = Column(Boolean, default=True) # Credit vs Debit
     raw_data = Column(Text) # Original message or file path

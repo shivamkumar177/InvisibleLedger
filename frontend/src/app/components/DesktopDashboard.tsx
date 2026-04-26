@@ -9,6 +9,7 @@ type Transaction = {
   currency: string;
   merchant: string;
   category: string;
+  payment_method: string;
   is_expense: boolean;
   raw_data: string;
 };
@@ -168,14 +169,19 @@ export default function DesktopDashboard({ token, onLogout }: { token: string, o
                   </thead>
                   <tbody className="font-mono text-sm divide-y divide-surface-variant/50">
                     {transactions.map(t => (
-                      <tr key={t.id} onClick={() => setSelectedTx(t)} className={`hover:bg-surface-variant/30 cursor-pointer ${selectedTx?.id === t.id ? 'bg-surface-variant/50' : ''}`}>
+                      <tr key={t.id} onClick={() => setSelectedTx(t)} className={`hover:bg-surface-variant/30 cursor-pointer transition-colors ${selectedTx?.id === t.id ? 'bg-primary/5 border-l-2 border-primary' : 'border-l-2 border-transparent'}`}>
                         <td className="px-4 py-3 text-tertiary">{new Date(t.timestamp).toLocaleDateString()}</td>
                         <td className="px-4 py-3 font-medium flex items-center gap-2">
-                           <div className={`w-2 h-2 rounded-full ${t.is_expense ? 'bg-error' : 'bg-primary'}`}></div>
-                           {t.merchant}
+                           <div className={`w-8 h-8 rounded border border-surface-variant flex items-center justify-center bg-surface-container-high text-tertiary mr-2`}>
+                             <span className="material-symbols-outlined text-[16px]">{t.is_expense ? 'receipt_long' : 'south_west'}</span>
+                           </div>
+                           <div className="flex flex-col">
+                             <span className="text-on-surface font-medium">{t.merchant}</span>
+                             <span className="text-[11px] text-tertiary font-mono">{t.payment_method}</span>
+                           </div>
                         </td>
-                        <td className="px-4 py-3"><span className="bg-surface-variant/50 px-2 py-0.5 rounded text-[11px] text-tertiary">{t.category}</span></td>
-                        <td className={`px-4 py-3 text-right ${t.is_expense ? '' : 'text-primary'}`}>
+                        <td className="px-4 py-3"><span className="bg-surface-variant/50 px-2 py-0.5 rounded text-[11px] text-tertiary border border-surface-variant">{t.category}</span></td>
+                        <td className={`px-4 py-3 text-right ${t.is_expense ? 'text-on-surface' : 'text-primary'}`}>
                           {t.is_expense ? '-' : '+'}${t.amount.toFixed(2)}
                         </td>
                       </tr>
@@ -217,6 +223,7 @@ export default function DesktopDashboard({ token, onLogout }: { token: string, o
   timestamp: selectedTx.timestamp,
   merchant: selectedTx.merchant,
   category: selectedTx.category,
+  payment_method: selectedTx.payment_method,
   amount: selectedTx.amount,
   currency: selectedTx.currency,
   is_expense: selectedTx.is_expense,
